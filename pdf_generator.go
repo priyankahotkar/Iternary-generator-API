@@ -23,7 +23,8 @@ var (
 func addLogo(pdf *gofpdf.Fpdf) {
 	logoPath := "public/logo.png"
 	if _, err := os.Stat(logoPath); err == nil {
-		pdf.ImageOptions(logoPath, 15, 12, 30, 18, false, gofpdf.ImageOptions{ImageType: "PNG", ReadDpi: true}, 0, "")
+		// Center the logo in the header
+		pdf.ImageOptions(logoPath, 18, 8, 38, 22, false, gofpdf.ImageOptions{ImageType: "PNG", ReadDpi: true}, 0, "")
 	}
 }
 
@@ -33,21 +34,21 @@ func addHeader(pdf *gofpdf.Fpdf, req ItineraryRequest) {
 	addLogo(pdf)
 	pdf.SetFont("Arial", "B", 22)
 	pdf.SetTextColor(255, 255, 255)
-	pdf.SetXY(50, 10)
-	pdf.CellFormat(150, 10, fmt.Sprintf("Hi, %s!", req.GreetingName), "", 1, "R", false, 0, "")
+	pdf.SetXY(60, 10)
+	pdf.CellFormat(140, 10, fmt.Sprintf("Hi, %s!", req.GreetingName), "", 1, "R", false, 0, "")
 	pdf.SetFont("Arial", "B", 16)
-	pdf.SetXY(50, 18)
-	pdf.CellFormat(150, 8, fmt.Sprintf("%s Travel Itinerary", req.Destination), "", 1, "R", false, 0, "")
+	pdf.SetXY(60, 18)
+	pdf.CellFormat(140, 8, fmt.Sprintf("%s Travel Itinerary", req.Destination), "", 1, "R", false, 0, "")
 	pdf.SetFont("Arial", "", 13)
-	pdf.SetXY(50, 26)
-	pdf.CellFormat(150, 7, fmt.Sprintf("%d Days %d Nights", req.DurationDays, req.DurationNights), "", 1, "R", false, 0, "")
+	pdf.SetXY(60, 26)
+	pdf.CellFormat(140, 7, fmt.Sprintf("%d Days %d Nights", req.DurationDays, req.DurationNights), "", 1, "R", false, 0, "")
 	pdf.SetFont("Arial", "", 13)
-	pdf.SetXY(50, 32)
-	pdf.CellFormat(150, 6, "✈️ 🏨 🚗 🚌", "", 1, "R", false, 0, "")
+	pdf.SetXY(60, 32)
+	pdf.CellFormat(140, 6, "✈️ 🏨 🚗 🚌", "", 1, "R", false, 0, "")
 }
 
 func addTripSummary(pdf *gofpdf.Fpdf, req ItineraryRequest) {
-	pdf.SetY(40)
+	pdf.SetY(44)
 	pdf.SetFont("Arial", "B", 13)
 	pdf.SetTextColor(primaryPurple[0], primaryPurple[1], primaryPurple[2])
 	pdf.SetFillColor(lightGray[0], lightGray[1], lightGray[2])
@@ -67,10 +68,27 @@ func addTripSummary(pdf *gofpdf.Fpdf, req ItineraryRequest) {
 	pdf.CellFormat(36, 10, req.ArrivalDate, "1", 0, "C", false, 0, "")
 	pdf.CellFormat(36, 10, req.Destination, "1", 0, "C", false, 0, "")
 	pdf.CellFormat(36, 10, fmt.Sprintf("%d", req.NumTravellers), "1", 1, "C", false, 0, "")
-	pdf.Ln(4)
+	pdf.Ln(6)
 }
 
 func addItinerary(pdf *gofpdf.Fpdf, req ItineraryRequest) {
+	pdf.SetFont("Arial", "B", 14)
+	pdf.SetTextColor(primaryPurple[0], primaryPurple[1], primaryPurple[2])
+	pdf.SetX(15)
+	pdf.CellFormat(0, 10, "", "", 1, "L", false, 0, "")
+	pdf.SetX(15)
+	pdf.CellFormat(0, 10, "", "", 1, "L", false, 0, "")
+	pdf.SetX(15)
+	pdf.CellFormat(0, 10, "", "", 1, "L", false, 0, "")
+	pdf.SetX(15)
+	pdf.CellFormat(0, 10, "", "", 1, "L", false, 0, "")
+	pdf.SetX(15)
+	pdf.CellFormat(0, 10, "Itinerary Details", "", 1, "L", false, 0, "")
+	pdf.SetDrawColor(primaryPurple[0], primaryPurple[1], primaryPurple[2])
+	pdf.SetLineWidth(2)
+	pdf.Line(15, pdf.GetY(), 195, pdf.GetY())
+	pdf.Ln(2)
+
 	dayKeys := map[string]bool{}
 	for k := range req.Activities {
 		dayKeys[k] = true
@@ -93,23 +111,29 @@ func addItinerary(pdf *gofpdf.Fpdf, req ItineraryRequest) {
 	for i, date := range sortedDays {
 		startY := pdf.GetY()
 		pdf.SetFillColor(sectionBg[0], sectionBg[1], sectionBg[2])
-		pdf.Rect(15, startY, 180, 54, "F")
-		pdf.SetY(startY + 6)
+		pdf.Rect(15, startY, 180, 60, "F")
+		pdf.SetY(startY + 8)
 		pdf.SetX(22)
-		pdf.SetFont("Arial", "B", 14)
+		pdf.SetFont("Arial", "B", 15)
 		pdf.SetTextColor(primaryPurple[0], primaryPurple[1], primaryPurple[2])
-		pdf.CellFormat(0, 8, fmt.Sprintf("Day %d: %s", i+1, date), "", 1, "L", false, 0, "")
+		pdf.CellFormat(0, 9, fmt.Sprintf("Day %d: %s", i+1, date), "", 1, "L", false, 0, "")
 		pdf.SetFont("Arial", "", 11)
 		pdf.SetTextColor(gray[0], gray[1], gray[2])
-		pdf.SetX(28)
+		pdf.SetX(32)
 		times := []string{"Morning", "Afternoon", "Evening"}
 		for _, t := range times {
-			pdf.SetFont("Arial", "B", 11)
-			pdf.SetTextColor(blueAccent[0], blueAccent[1], blueAccent[2])
+			pdf.SetFont("Arial", "B", 12)
+			if t == "Morning" {
+				pdf.SetTextColor(blueAccent[0], blueAccent[1], blueAccent[2])
+			} else if t == "Afternoon" {
+				pdf.SetTextColor(blueAccent[0], blueAccent[1], blueAccent[2])
+			} else {
+				pdf.SetTextColor(primaryPurple[0], primaryPurple[1], primaryPurple[2])
+			}
 			pdf.CellFormat(0, 7, t, "", 1, "L", false, 0, "")
 			pdf.SetFont("Arial", "", 10)
 			pdf.SetTextColor(gray[0], gray[1], gray[2])
-			pdf.SetX(34)
+			pdf.SetX(40)
 			if acts, ok := req.Activities[date]; ok && len(acts) > 0 {
 				for _, a := range acts {
 					if strings.HasPrefix(a, t+" - ") {
@@ -121,11 +145,13 @@ func addItinerary(pdf *gofpdf.Fpdf, req ItineraryRequest) {
 				for _, f := range flights {
 					pdf.SetTextColor(greenAccent[0], greenAccent[1], greenAccent[2])
 					pdf.CellFormat(0, 6, "✈️ "+fmt.Sprintf("%s (%s → %s @ %s)", f.FlightNo, f.From, f.To, f.Time), "", 1, "L", false, 0, "")
+					pdf.SetTextColor(gray[0], gray[1], gray[2])
 				}
 			}
 			if tr, ok := req.Transfers[date]; ok && tr != "" && t == "Morning" {
 				pdf.SetTextColor(blueAccent[0], blueAccent[1], blueAccent[2])
 				pdf.CellFormat(0, 6, "🚖 "+tr, "", 1, "L", false, 0, "")
+				pdf.SetTextColor(gray[0], gray[1], gray[2])
 			}
 			if hotel, ok := req.Hotels[date]; ok && t == "Evening" {
 				pdf.SetTextColor(primaryPurple[0], primaryPurple[1], primaryPurple[2])
@@ -135,7 +161,7 @@ func addItinerary(pdf *gofpdf.Fpdf, req ItineraryRequest) {
 				pdf.CellFormat(0, 6, fmt.Sprintf("Check-in: %s | Check-out: %s", hotel.CheckIn, hotel.CheckOut), "", 1, "L", false, 0, "")
 			}
 		}
-		pdf.Ln(8)
+		pdf.Ln(2)
 	}
 }
 
